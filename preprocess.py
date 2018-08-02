@@ -28,7 +28,7 @@ width_flag = 70
 width_team = 115
 width_white_pad = 10
 
-maxdev = 5
+maxdev: int = 5
 windowsize = 5
 refcolor = np.array([246, 170, 41], dtype=np.uint8)
 whiterefcolor = np.array([255, 250, 252], dtype=np.uint8)
@@ -45,8 +45,8 @@ if DEBUG_FLAG:
     clip.save_frame("frame_riding.png", t='03:06:30')
     clip.save_frame("frame_finish.png", t='03:07:00')
 
-substart = '00:00:00'
-subend   = '00:30:00'
+substart = '03:26:00'
+subend   = '04:26:00'
 #%%
 subclip = clip.subclip(substart, subend)
 # crop subframes
@@ -87,6 +87,12 @@ def color_in_range(pixels, refcolor):
         if c not in rgbrange:
             return False
     return True
+
+def color_in_range2(pixels, refcolor):
+    color = np.round(np.average(np.reshape(pixels, [1, 3]), axis=0))
+    dev = sum(color - refcolor)
+    return abs(dev) <= 3*maxdev
+
 
 # apply function on the iterator
 colormatches = [color_in_range(c, refcolor) for c in pixelcolor.iter_frames()]
@@ -156,8 +162,6 @@ def mergefiltered(filteredchanges):
         if prevkey != v:
             prevkey = v;
             # flush queue
-            print("flush:")
-            print(queue)
             if len(queue) > 0:
                 (queue, newel) = flushqueue(queue)
                 out += newel
